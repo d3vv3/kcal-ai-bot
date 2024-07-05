@@ -3,7 +3,6 @@
 services:
   backend:
     image: ghcr.io/d3vv3/kcal-ai-bot/api:latest
-    build: backend
     ports:
       - "${API_PORT:-8000}:80"
     depends_on:
@@ -17,7 +16,6 @@ services:
 
   worker:
     image: ghcr.io/d3vv3/kcal-ai-bot/api:latest
-    build: backend
     command: rq worker --url redis://redis:6379
     depends_on:
       - redis
@@ -27,7 +25,6 @@ services:
 
   bot:
     image: ghcr.io/d3vv3/kcal-ai-bot/bot:latest
-    build: bot
     depends_on:
       - backend
     environment:
