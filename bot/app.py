@@ -69,7 +69,7 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     logger.debug("Photo file: %s", photo_file)
 
     # Send a message to the user
-    await update.message.reply_text(
+    message = await update.message.reply_text(
         "Calculating the calories in the meal. Please wait a moment. 🕒"
     )
 
@@ -92,9 +92,7 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         )
         return
 
-    # TODO: Request to the API with the image file and parse the JSON response.
-    # For now, just send a dummy response
-    await update.message.reply_text(
+    await message.edit_text(
         f"🍽️ *{meal_name}*"
         f"\n_{calories} kcal_"
         "\n\n*Macronutrient content*"
