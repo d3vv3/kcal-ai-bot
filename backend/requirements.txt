@@ -116,3 +116,5 @@ watchfiles==0.22.0
     # via uvicorn
 websockets==12.0
     # via uvicorn
+httpx==0.27.0
+anthropic==0.30.1

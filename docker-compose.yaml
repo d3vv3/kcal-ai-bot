@@ -9,6 +9,7 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
 
   redis:
     container_name: kcal-ai-bot-redis
@@ -23,6 +24,7 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
 
   bot:
     container_name: kcal-ai-bot-bot

@@ -12,6 +12,7 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     command: /start-reload.sh
 
   redis:
@@ -27,3 +28,4 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
