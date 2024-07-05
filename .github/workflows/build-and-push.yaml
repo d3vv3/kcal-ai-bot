@@ -14,6 +14,11 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        image:
+          - bot
+          - backend
 
     steps:
     - name: Checkout repository
@@ -27,8 +32,8 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build Docker image
-      run: docker build -t ghcr.io/${{ github.repository_owner }}/bot:latest ./bot -f ./bot/Dockerfile
+      run: docker build -t ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest ./${{ matrix.image }} -f ./${{ matrix.image }}/Dockerfile
 
     - name: Push Docker image to GitHub Container Registry
-      run: docker push ghcr.io/${{ github.repository_owner }}/bot:latest
+      run: docker push ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
 
