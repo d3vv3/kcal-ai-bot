@@ -51,12 +51,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         reply_markup=ForceReply(selective=True),
     )
     await update.message.reply_text(
-        "Send me pictures 📷 of your meals 🥗 where the food is clearly visible."
+        "Send me pictures 📷 of your meals 🥗 where the food is clearly visible. "
         "I'll provide you with a calorie estimate for it. "
         "I will also specify the macronutrient content of the meal."
     )
     await update.message.reply_text(
-        "For example, in a sandwich 🥪, it is best to provide a picture of"
+        "For example, in a sandwich 🥪, it is best to provide a picture of "
         "the open sandwich."
     )
 
