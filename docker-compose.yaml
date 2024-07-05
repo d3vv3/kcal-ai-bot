@@ -2,7 +2,8 @@
 
 services:
   backend:
-    build: .
+    image: ghcr.io/d3vv3/kcal-ai-bot/api:latest
+    build: backend
     ports:
       - "${API_PORT:-8000}:80"
     depends_on:
@@ -15,10 +16,19 @@ services:
     image: "redis:7-alpine"
 
   worker:
-    build: .
+    image: ghcr.io/d3vv3/kcal-ai-bot/api:latest
+    build: backend
     command: rq worker --url redis://redis:6379
     depends_on:
       - redis
     environment:
       - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
+
+  bot:
+    image: ghcr.io/d3vv3/kcal-ai-bot/bot:latest
+    build: bot
+    depends_on:
+      - backend
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
