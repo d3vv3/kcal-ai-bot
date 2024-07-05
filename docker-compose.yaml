@@ -2,6 +2,7 @@ services:
   backend:
     container_name: kcal-ai-bot-backend
     image: ghcr.io/d3vv3/kcal-ai-bot/backend:latest
+    restart: unless-stopped
     ports:
       - "${API_PORT:-8000}:80"
     depends_on:
@@ -18,6 +19,7 @@ services:
   worker:
     container_name: kcal-ai-bot-worker
     image: ghcr.io/d3vv3/kcal-ai-bot/backend:latest
+    restart: unless-stopped
     command: rq worker --url redis://redis:6379
     depends_on:
       - redis
@@ -29,6 +31,7 @@ services:
   bot:
     container_name: kcal-ai-bot-bot
     image: ghcr.io/d3vv3/kcal-ai-bot/bot:latest
+    restart: unless-stopped
     depends_on:
       - backend
     environment:
