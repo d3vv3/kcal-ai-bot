@@ -1,8 +1,7 @@
----
-
 services:
   backend:
-    image: ghcr.io/d3vv3/kcal-ai-bot/api:latest
+    container_name: kcal-ai-bot-backend
+    image: ghcr.io/d3vv3/kcal-ai-bot/backend:latest
     ports:
       - "${API_PORT:-8000}:80"
     depends_on:
@@ -12,10 +11,12 @@ services:
       - REDIS_URL=redis://redis:6379
 
   redis:
+    container_name: kcal-ai-bot-redis
     image: "redis:7-alpine"
 
   worker:
-    image: ghcr.io/d3vv3/kcal-ai-bot/api:latest
+    container_name: kcal-ai-bot-worker
+    image: ghcr.io/d3vv3/kcal-ai-bot/backend:latest
     command: rq worker --url redis://redis:6379
     depends_on:
       - redis
@@ -24,6 +25,7 @@ services:
       - REDIS_URL=redis://redis:6379
 
   bot:
+    container_name: kcal-ai-bot-bot
     image: ghcr.io/d3vv3/kcal-ai-bot/bot:latest
     depends_on:
       - backend
