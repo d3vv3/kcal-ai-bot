@@ -71,7 +71,8 @@ def analyze_image_with_claude(image_url):
                         "type": "text",
                         "text": """
 Provide a calorie estimate for this meal in kcal. Also, specify the macronutrient content of the meal in percentages.
-Reply in JSON format with the following keys: 'meal_name', 'calories', 'protein', 'carbs', 'fat'.""",
+Reply in JSON format with the following keys: 'meal_name', 'calories', 'protein', 'carbs', 'fat'.
+DO NOT REPLY ANYTHING ELSE THAN JSON. Do your best to provide a good estimation.""",
                     },
                 ],
             }
