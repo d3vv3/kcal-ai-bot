@@ -42,9 +42,6 @@ if not TELEGRAM_BOT_TOKEN:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a welcome and instructions message when the command
     /start is issued."""
-    await context.bot.send_chat_action(
-        chat_id=update.effective_chat.id, action="typing"
-    )
     user = update.effective_user
     await update.message.reply_html(
         rf"Hi {user.mention_html()}!",
@@ -64,9 +61,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Calculate the calories in the meal."""
     # Get the photo file
-    await context.bot.send_chat_action(
-        chat_id=update.effective_chat.id, action="typing"
-    )
     photo_id = update.message.photo[-1].file_id
     photo_file = await context.bot.get_file(photo_id)
     logger.debug("Photo file: %s", photo_file)
