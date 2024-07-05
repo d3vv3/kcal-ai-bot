@@ -69,7 +69,7 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     logger.debug("Photo file: %s", photo_file)
 
     # Send a message to the user
-    await update.message.reply_text(
+    message = await update.message.reply_text(
         "Calculating the calories in the meal. Please wait a moment. 🕒"
     )
 
@@ -78,12 +78,19 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             f"{BACKEND_BASE_URL}/meal?photo_url={photo_file.file_path}&user_id={update.effective_user.id}"
         )
 
+        logger.info("Response from the API: %s", response.text)
+
         data_json = response.json()
         meal_name = data_json["meal_name"]
         calories = data_json["calories"]
         carbs = calories * (data_json["carbs"] / 100) / 4
         fat = calories * (data_json["carbs"] / 100) / 9
         protein = calories * (data_json["carbs"] / 100) / 4
+
+        logger.info("Calories in the meal: %s", calories)
+        logger.info("Protein in the meal: %s", protein)
+        logger.info("Carbs in the meal: %s", carbs)
+        logger.info("Fat in the meal: %s", fat)
 
     except requests.exceptions.RequestException as e:
         logger.error("Error in request to the API: %s", e)
@@ -92,13 +99,15 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         )
         return
 
-    await update.message.reply_text(
-        f"🍽️ *{meal_name}*"
-        f"\n_{calories} kcal_"
-        "\n\n*Macronutrient content*"
-        f"\n💪 Protein: {protein} g"
-        f"\n🌾 Carbohydrates: {carbs} g"
-        f"\n🧈 Fat: {fat} g",
+    await message.edit_text(
+        f"""🍽️ *{meal_name}*
+  _{round(calories)} kcal_
+
+*Macronutrient content*
+  💪 Protein: {round(protein)} g
+  🌾 Carbohydrates: {round(carbs)} g
+  🧈 Fat: {round(fat)} g
+""",
         parse_mode="MarkdownV2",
     )
 
