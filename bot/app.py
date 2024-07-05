@@ -84,8 +84,8 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         meal_name = data_json["meal_name"]
         calories = data_json["calories"]
         carbs = calories * (data_json["carbs"] / 100) / 4
-        fat = calories * (data_json["carbs"] / 100) / 9
-        protein = calories * (data_json["carbs"] / 100) / 4
+        fat = calories * (data_json["fat"] / 100) / 9
+        protein = calories * (data_json["protein"] / 100) / 4
 
         logger.info("Calories in the meal: %s", calories)
         logger.info("Protein in the meal: %s", protein)

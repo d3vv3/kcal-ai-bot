@@ -36,4 +36,4 @@ services:
       - backend
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - BACKEND_BASE_URL=https://kcal.sgn.space
+      - BACKEND_BASE_URL=http://backend
