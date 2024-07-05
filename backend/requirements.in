@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+sqlmodel
+rq
+redis
+python-multipart
+loguru

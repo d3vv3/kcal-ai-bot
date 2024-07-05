@@ -1,0 +1,24 @@
+---
+
+services:
+  backend:
+    build: .
+    ports:
+      - "${API_PORT:-8000}:80"
+    depends_on:
+      - redis
+    environment:
+      - DATABASE_URL=sqlite:///./calorie_counter.db
+      - REDIS_URL=redis://redis:6379
+
+  redis:
+    image: "redis:7-alpine"
+
+  worker:
+    build: .
+    command: rq worker --url redis://redis:6379
+    depends_on:
+      - redis
+    environment:
+      - DATABASE_URL=sqlite:///./calorie_counter.db
+      - REDIS_URL=redis://redis:6379
