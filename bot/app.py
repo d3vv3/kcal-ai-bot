@@ -16,7 +16,6 @@ bot.
 import logging
 import os
 import sys
-import tempfile
 
 import requests
 from telegram import ForceReply, Update
@@ -36,6 +35,10 @@ logger = logging.getLogger(__name__)
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not TELEGRAM_BOT_TOKEN:
     logger.error("Please set the TELEGRAM_BOT_TOKEN environment variable")
+    sys.exit(1)
+BACKEND_BASE_URL = os.environ.get("BACKEND_BASE_URL")
+if not BACKEND_BASE_URL:
+    logger.error("Please set the BACKEND_BASE_URL environment variable")
     sys.exit(1)
 
 
@@ -65,25 +68,39 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     photo_file = await context.bot.get_file(photo_id)
     logger.debug("Photo file: %s", photo_file)
 
-    response = requests.get(photo_file.file_path)
-    with tempfile.NamedTemporaryFile(mode="w+b") as temp_file:
-        temp_file.write(response.content)
-        temp_file.flush()
-
     # Send a message to the user
     await update.message.reply_text(
         "Calculating the calories in the meal. Please wait a moment. 🕒"
     )
 
+    try:
+        response = requests.post(
+            f"{BACKEND_BASE_URL}/meal?photo_url={photo_file.file_path}&user_id={update.effective_user.id}"
+        )
+
+        data_json = response.json()
+        meal_name = data_json["meal_name"]
+        calories = data_json["calories"]
+        carbs = calories * (data_json["carbs"] / 100) / 4
+        fat = calories * (data_json["carbs"] / 100) / 9
+        protein = calories * (data_json["carbs"] / 100) / 4
+
+    except requests.exceptions.RequestException as e:
+        logger.error("Error in request to the API: %s", e)
+        await update.message.reply_text(
+            "Sorry, I was unable to calculate the calories in the meal. Please try again later."
+        )
+        return
+
     # TODO: Request to the API with the image file and parse the JSON response.
     # For now, just send a dummy response
     await update.message.reply_text(
-        "🍽️ *Gazpacho con jamón*"
-        "\n_500 kcal_"
+        f"🍽️ *{meal_name}*"
+        f"\n_{calories} kcal_"
         "\n\n*Macronutrient content*"
-        "\n💪 Protein: 20g"
-        "\n🌾 Carbohydrates: 50g"
-        "\n🧈 Fat: 25g",
+        f"\n💪 Protein: {protein} g"
+        f"\n🌾 Carbohydrates: {carbs} g"
+        f"\n🧈 Fat: {fat} g",
         parse_mode="MarkdownV2",
     )
 
