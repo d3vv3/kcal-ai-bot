@@ -87,7 +87,8 @@ async def daily_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
   💪 Protein: {data_json["protein"]} g
   🌾 Carbohydrates: {data_json["carbs"]} g
   🧈 Fat: {data_json["fat"]} g
-"""
+""",
+        parse_mode="MarkdownV2",
     )
 
 
