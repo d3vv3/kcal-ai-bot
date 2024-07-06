@@ -12,7 +12,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
-      - ${BACKEND_DATA:-./data}:/data
+      - ${BACKEND_DATA:-./data}:/app/data
 
 
   redis:
@@ -31,7 +31,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
-      - ${BACKEND_DATA:-./data}:/data
+      - ${BACKEND_DATA:-./data}:/app/data
 
   bot:
     container_name: kcal-ai-bot-bot
