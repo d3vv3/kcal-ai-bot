@@ -1,5 +1,3 @@
----
-
 services:
   backend:
     build: .
@@ -9,8 +7,8 @@ services:
       - redis
     volumes:
       - .:/app
+      - ${BACKEND_DATA:-./data}:/data
     environment:
-      - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     command: /start-reload.sh
@@ -25,7 +23,7 @@ services:
       - redis
     volumes:
       - .:/app
+      - ${BACKEND_DATA:-./data}:/data
     environment:
-      - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}

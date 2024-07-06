@@ -2,7 +2,7 @@
 import base64
 import json
 from asyncio import sleep as asleep
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import anthropic
 import httpx
@@ -26,7 +26,7 @@ class FoodEntry(SQLModel, table=True):
 
 
 # Database setup
-DATABASE_URL = "sqlite:///./calorie_counter.db"
+DATABASE_URL = "sqlite:///data/calorie_counter.db"
 engine = create_engine(DATABASE_URL)
 
 SQLModel.metadata.create_all(engine)

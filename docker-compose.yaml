@@ -8,9 +8,11 @@ services:
     depends_on:
       - redis
     environment:
-      - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - ${BACKEND_DATA:-./data}:/data
+
 
   redis:
     container_name: kcal-ai-bot-redis
@@ -24,9 +26,10 @@ services:
     depends_on:
       - redis
     environment:
-      - DATABASE_URL=sqlite:///./calorie_counter.db
       - REDIS_URL=redis://redis:6379
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - ${BACKEND_DATA:-./data}:/data
 
   bot:
     container_name: kcal-ai-bot-bot
