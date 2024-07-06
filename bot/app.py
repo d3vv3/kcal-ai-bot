@@ -57,7 +57,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
     await update.message.reply_text(
         "For example, in a sandwich 🥪, it is best to provide a picture of "
-        "the open sandwich."
+        "the open sandwich. This way, I can see the ingredients inside."
+    )
+    await update.message.reply_text(
+        "You may also want to send me a picture of the nutrition label 🏷️ "
+        "instead, or add a caption to the photo with useful information I "
+        "should consider."
     )
 
 
@@ -96,6 +101,7 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     """Calculate the calories in the meal."""
     # Get the photo file
     photo_id = update.message.photo[-1].file_id
+    photo_caption = update.message.caption
     photo_file = await context.bot.get_file(photo_id)
     logger.debug("Photo file: %s", photo_file)
 
@@ -104,10 +110,14 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         "Calculating the calories in the meal. Please wait a moment. 🕒"
     )
 
+    request_body = {
+        "photo_url": photo_file.file_path,
+        "user_input": photo_caption,
+        "user_id": update.effective_user.id,
+    }
+
     try:
-        response = requests.post(
-            f"{BACKEND_BASE_URL}/meal?photo_url={photo_file.file_path}&user_id={update.effective_user.id}"
-        )
+        response = requests.post(f"{BACKEND_BASE_URL}/meal", json=request_body)
 
         logger.debug("Response from the API: %s", response.text)
 

@@ -8,6 +8,7 @@ import anthropic
 import httpx
 from fastapi import Depends, FastAPI, HTTPException
 from loguru import logger
+from pydantic import BaseModel
 from redis import Redis
 from rq import Queue
 from sqlmodel import Field, Session, SQLModel, create_engine, select
@@ -23,6 +24,13 @@ class FoodEntry(SQLModel, table=True):
     protein: float
     carbs: float
     fat: float
+
+
+# Define the request body model
+class MealAnalysisRequest(BaseModel):
+    photo_url: str
+    user_id: int = 1
+    user_input: str | None = None
 
 
 # Database setup
@@ -47,7 +55,7 @@ def get_session():
 
 
 # Helper function to analyze image using Claude 3.5
-def analyze_image_with_claude(image_url):
+def analyze_image_with_claude(image_url, user_input=None):
     logger.info("Start analysis")
     logger.info(f"Image URL: {image_url}")
     start = datetime.now()
@@ -70,10 +78,13 @@ def analyze_image_with_claude(image_url):
                     },
                     {
                         "type": "text",
-                        "text": """
+                        "text": f"""
 Provide a calorie estimate for this meal in kcal. Also, specify the macronutrient content of the meal in percentages.
 Reply in JSON format with the following keys: 'meal_name', 'calories', 'protein', 'carbs', 'fat'.
-DO NOT REPLY ANYTHING ELSE THAN JSON. Do your best to provide a good estimation.""",
+DO NOT REPLY ANYTHING ELSE THAN JSON. Do your best to provide a good estimation.
+
+Additional information to helm on the estimation: {user_input or "None"}
+""",
                     },
                 ],
             }
@@ -86,10 +97,12 @@ DO NOT REPLY ANYTHING ELSE THAN JSON. Do your best to provide a good estimation.
 # Endpoint to upload an image and get calorie/macro information
 @app.post("/meal", response_model=FoodEntry)
 async def analyze_image(
-    photo_url: str, user_id: int = 1, session: Session = Depends(get_session)
+    meal_request: MealAnalysisRequest, session: Session = Depends(get_session)
 ):
     # Enqueue the task to analyze the image
-    job = q.enqueue(analyze_image_with_claude, photo_url)
+    job = q.enqueue(
+        analyze_image_with_claude, meal_request.photo_url, meal_request.user_input
+    )
     # Wait for the job to finish
     while not job.result:
         await asleep(0.1)
@@ -106,7 +119,7 @@ async def analyze_image(
 
     # Create a new FoodEntry
     new_entry = FoodEntry(
-        user_id=user_id,
+        user_id=meal_request.user_id,
         timestamp=datetime.now(),
         meal_name=meal_name,
         calories=calories,
