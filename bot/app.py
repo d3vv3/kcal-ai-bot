@@ -128,7 +128,11 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
   💪 Protein: {round(data_json["protein"])} g
   🌾 Carbohydrates: {round(data_json["carbs"])} g
   🧈 Fat: {round(data_json["fat"])} g
-""",
+""".replace(
+            "-", "\\-"
+        ).replace(
+            ".", "\\."
+        ),
         parse_mode="MarkdownV2",
     )
 
