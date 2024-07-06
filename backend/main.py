@@ -18,6 +18,7 @@ class FoodEntry(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     user_id: int
     timestamp: datetime
+    meal_name: str
     calories: float
     protein: float
     carbs: float
@@ -83,7 +84,7 @@ DO NOT REPLY ANYTHING ELSE THAN JSON. Do your best to provide a good estimation.
 
 
 # Endpoint to upload an image and get calorie/macro information
-@app.post("/meal")
+@app.post("/meal", response_model=FoodEntry)
 async def analyze_image(
     photo_url: str, user_id: int = 1, session: Session = Depends(get_session)
 ):
@@ -97,19 +98,28 @@ async def analyze_image(
     if result is None:
         raise HTTPException(status_code=500, detail="Image analysis failed")
 
+    meal_name = result["meal_name"]
+    calories = round(result["calories"])
+    carbs = round(calories * (result["carbs"] / 100) / 4)
+    fat = round(calories * (result["fat"] / 100) / 9)
+    protein = round(calories * (result["protein"] / 100) / 4)
+
     # Create a new FoodEntry
     new_entry = FoodEntry(
         user_id=user_id,
         timestamp=datetime.now(),
-        calories=result["calories"],
-        protein=result["protein"],
-        carbs=result["carbs"],
-        fat=result["fat"],
+        meal_name=meal_name,
+        calories=calories,
+        protein=protein,
+        carbs=carbs,
+        fat=fat,
     )
     session.add(new_entry)
     session.commit()
 
-    return result
+    session.refresh(new_entry)
+
+    return new_entry
 
 
 # Endpoint to get daily status
@@ -128,10 +138,10 @@ def get_daily_status(user_id: int, session: Session = Depends(get_session)):
     total_fat = sum(entry.fat for entry in entries)
 
     return {
-        "total_calories": total_calories,
-        "total_protein": total_protein,
-        "total_carbs": total_carbs,
-        "total_fat": total_fat,
+        "calories": total_calories,
+        "protein": total_protein,
+        "carbs": total_carbs,
+        "fat": total_fat,
     }
 
 

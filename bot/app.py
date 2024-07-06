@@ -61,6 +61,36 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
+async def daily_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Get the daily status of the user."""
+    try:
+        response = requests.get(
+            f"{BACKEND_BASE_URL}/daily_status/{update.effective_user.id}"
+        )
+
+        logger.debug("Response from the API: %s", response.text)
+
+        data_json = response.json()
+
+    except requests.exceptions.RequestException as e:
+        logger.error("Error in request to the API: %s", e)
+        await update.message.reply_text(
+            "Sorry, I was unable to get your daily status. Please try again later."
+        )
+        return
+
+    await update.message.reply_text(
+        f"""📆 *Today*
+  _{data_json["calories"]} kcal_
+
+*Macronutrient content*
+  💪 Protein: {data_json["protein"]} g
+  🌾 Carbohydrates: {data_json["carbs"]} g
+  🧈 Fat: {data_json["fat"]} g
+"""
+    )
+
+
 async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Calculate the calories in the meal."""
     # Get the photo file
@@ -78,19 +108,9 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             f"{BACKEND_BASE_URL}/meal?photo_url={photo_file.file_path}&user_id={update.effective_user.id}"
         )
 
-        logger.info("Response from the API: %s", response.text)
+        logger.debug("Response from the API: %s", response.text)
 
         data_json = response.json()
-        meal_name = data_json["meal_name"]
-        calories = data_json["calories"]
-        carbs = calories * (data_json["carbs"] / 100) / 4
-        fat = calories * (data_json["fat"] / 100) / 9
-        protein = calories * (data_json["protein"] / 100) / 4
-
-        logger.info("Calories in the meal: %s", calories)
-        logger.info("Protein in the meal: %s", protein)
-        logger.info("Carbs in the meal: %s", carbs)
-        logger.info("Fat in the meal: %s", fat)
 
     except requests.exceptions.RequestException as e:
         logger.error("Error in request to the API: %s", e)
@@ -100,13 +120,13 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         return
 
     await message.edit_text(
-        f"""🍽️ *{meal_name}*
-  _{round(calories)} kcal_
+        f"""🍽️ *{data_json["meal_name"]}*
+  _{data_json["calories"]} kcal_
 
 *Macronutrient content*
-  💪 Protein: {round(protein)} g
-  🌾 Carbohydrates: {round(carbs)} g
-  🧈 Fat: {round(fat)} g
+  💪 Protein: {data_json["protein"]} g
+  🌾 Carbohydrates: {data_json["carbs"]} g
+  🧈 Fat: {data_json["fat"]} g
 """,
         parse_mode="MarkdownV2",
     )
@@ -117,6 +137,7 @@ def main() -> None:
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("today", daily_status))
     application.add_handler(MessageHandler(filters.PHOTO, kcal_calculator))
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
