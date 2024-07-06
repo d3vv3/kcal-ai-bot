@@ -81,12 +81,12 @@ async def daily_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     await update.message.reply_text(
         f"""📆 *Today*
-  _{data_json["calories"]} kcal_
+  _{round(data_json["calories"])} kcal_
 
 *Macronutrient content*
-  💪 Protein: {data_json["protein"]} g
-  🌾 Carbohydrates: {data_json["carbs"]} g
-  🧈 Fat: {data_json["fat"]} g
+  💪 Protein: {round(data_json["protein"])} g
+  🌾 Carbohydrates: {round(data_json["carbs"])} g
+  🧈 Fat: {round(data_json["fat"])} g
 """,
         parse_mode="MarkdownV2",
     )
@@ -122,12 +122,12 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     await message.edit_text(
         f"""🍽️ *{data_json["meal_name"]}*
-  _{data_json["calories"]} kcal_
+  _{round(data_json["calories"])} kcal_
 
 *Macronutrient content*
-  💪 Protein: {data_json["protein"]} g
-  🌾 Carbohydrates: {data_json["carbs"]} g
-  🧈 Fat: {data_json["fat"]} g
+  💪 Protein: {round(data_json["protein"])} g
+  🌾 Carbohydrates: {round(data_json["carbs"])} g
+  🧈 Fat: {round(data_json["fat"])} g
 """,
         parse_mode="MarkdownV2",
     )
