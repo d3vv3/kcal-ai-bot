@@ -18,9 +18,10 @@ import os
 import sys
 
 import requests
-from telegram import ForceReply, Update
-from telegram.ext import (Application, CommandHandler, ContextTypes,
-                          MessageHandler, filters)
+from telegram import (ForceReply, InlineKeyboardButton, InlineKeyboardMarkup,
+                      Update)
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
+                          ContextTypes, MessageHandler, filters)
 
 # Enable logging
 logging.basicConfig(
@@ -130,6 +131,10 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         )
         return
 
+    reply_markup = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("Remove from daily log", callback_data=data_json["id"])]]
+    )
+
     await message.edit_text(
         f"""🍽️ *{data_json["meal_name"]}*
   _{round(data_json["calories"])} kcal_
@@ -140,11 +145,50 @@ async def kcal_calculator(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
   🧈 Fat: {round(data_json["fat"])} g
 """.replace(
             "-", "\\-"
-        ).replace(
-            ".", "\\."
-        ),
+        )
+        .replace(".", "\\.")
+        .replace("(", "\\(")
+        .replace(")", "\\)"),
         parse_mode="MarkdownV2",
+        reply_markup=reply_markup,
     )
+
+
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Parses the CallbackQuery and deletes the meal from the daily log."""
+    query = update.callback_query
+
+    try:
+        response = requests.delete(
+            f"{BACKEND_BASE_URL}/meal/{query.data}&user_id={update.effective_user.id}",
+        )
+
+        logger.debug("Response from the API: %s", response.text)
+
+        if response.status_code == 404:
+            await query.message.reply_text(
+                "The meal was not found in the daily log. It may have already been removed."
+            )
+            return
+        elif response.status_code == 403:
+            await query.message.reply_text(
+                "You are not allowed to remove the meal from the daily log."
+            )
+            return
+
+    except requests.exceptions.RequestException as e:
+        logger.error("Error in request to the API: %s", e)
+        await query.message.reply_text(
+            "Sorry, I was unable to remove the meal from the daily log. Please try again later."
+        )
+        return
+
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    await query.answer()
+
+    await query.edit_message_text(reply_markup=None)
+    await query.message.reply_text("The meal has been removed from the daily log.")
 
 
 def main() -> None:
@@ -154,6 +198,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("today", daily_status))
     application.add_handler(MessageHandler(filters.PHOTO, kcal_calculator))
+    application.add_handler(CallbackQueryHandler(button))
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 

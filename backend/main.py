@@ -135,6 +135,18 @@ async def analyze_image(
     return new_entry
 
 
+@app.delete("/meal/{meal_id}")
+def delete_meal(meal_id: int, user_id: int, session: Session = Depends(get_session)):
+    entry = session.get(FoodEntry, meal_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Entry not found")
+    if entry.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    session.delete(entry)
+    session.commit()
+    return {"message": "Entry deleted"}
+
+
 # Endpoint to get daily status
 @app.get("/daily_status/{user_id}")
 def get_daily_status(user_id: int, session: Session = Depends(get_session)):
