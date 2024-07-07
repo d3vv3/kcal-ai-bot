@@ -160,7 +160,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     try:
         response = requests.delete(
-            f"{BACKEND_BASE_URL}/meal/{query.data}&user_id={update.effective_user.id}",
+            f"{BACKEND_BASE_URL}/meal/{query.data}",
+            params={"user_id": update.effective_user.id},
         )
 
         logger.debug("Response from the API: %s", response.text)

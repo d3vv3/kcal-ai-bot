@@ -136,15 +136,24 @@ async def analyze_image(
 
 
 @app.delete("/meal/{meal_id}")
-def delete_meal(meal_id: int, user_id: int, session: Session = Depends(get_session)):
+def delete_meal(
+    meal_id: int,
+    user_id: int = 1,
+    session: Session = Depends(get_session),
+):
     entry = session.get(FoodEntry, meal_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Entry not found")
     if entry.user_id != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
+
     session.delete(entry)
     session.commit()
-    session.refresh()
+
+    # Verify deletion
+    if session.get(FoodEntry, meal_id) is not None:
+        raise HTTPException(status_code=500, detail="Failed to delete entry")
+
     return {"message": "Entry deleted"}
 
 
