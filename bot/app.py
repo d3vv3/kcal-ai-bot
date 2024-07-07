@@ -187,7 +187,11 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     await query.answer()
 
-    await query.edit_message_text(reply_markup=None)
+    await query.edit_message_text(
+        text=query.message.text + "\n_Removed_",
+        reply_markup=None,
+        parse_mode="MarkdownV2",
+    )
     await query.message.reply_text("The meal has been removed from the daily log.")
 
 

@@ -144,6 +144,7 @@ def delete_meal(meal_id: int, user_id: int, session: Session = Depends(get_sessi
         raise HTTPException(status_code=403, detail="Forbidden")
     session.delete(entry)
     session.commit()
+    session.refresh()
     return {"message": "Entry deleted"}
 
 
