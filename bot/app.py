@@ -188,7 +188,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await query.answer()
 
     await query.edit_message_text(
-        text=query.message.text + "\n_Removed_",
+        text=f"~{query.message.text}~",
         reply_markup=None,
         parse_mode="MarkdownV2",
     )
