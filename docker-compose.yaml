@@ -17,6 +17,7 @@ services:
 
   redis:
     container_name: kcal-ai-bot-redis
+    restart: unless-stopped
     image: "redis:7-alpine"
 
   worker:
