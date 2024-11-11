@@ -84,6 +84,8 @@ Reply in JSON format with the following keys: 'meal_name', 'calories', 'protein'
 DO NOT REPLY ANYTHING ELSE THAN JSON. Do your best to provide a good estimation.
 
 Additional information to helm on the estimation: {user_input or "None"}
+
+If the picture contains no meal, reply with all the keys set to 0, and "Not a meal" as the meal_name.
 """,
                     },
                 ],
